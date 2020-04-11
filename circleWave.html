@@ -2,18 +2,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>Circle Wave Correlation</title>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
-<select id="player_fields" onclick="populatePlayerFields()" onchange="updateDrawing(value)">
-    <option selected>-- Player Field --</option>
-</select>
 <div id="vis">
     <svg width="640" height="640"></svg>
 </div>
-<!--<div class=“container”></div>-->
-<!--<button onclick="initDataMap();draw();">Draw</button>-->
-<!--<canvas id="container" width="640" height="960"></canvas>-->
+<select id="player_fields" onclick="populatePlayerFields()" onchange="updateDrawing(value)">
+    <option selected>-- Player Field --</option>
+</select>
 </html>
 <script>
 
@@ -23,6 +21,7 @@
     });
 
     var dataMap = new Map();
+    var legendKeys = [];
 
     // This function is asynchronous
     function initDataMap() {
@@ -45,9 +44,9 @@
     }
 
     function populatePlayerFields() {
-        initDataMap();
         var sel = document.getElementById("player_fields");
-        if(sel.children.length == 1) {
+        if (sel.children.length == 1) {
+            initDataMap();
             console.log("Populating fields");
             for (var k in dataMap) {
                 // console.log(k);
@@ -75,12 +74,17 @@
     function updateDrawing(field) {
         var topObj = get_top_n_values(dataMap, field, 5);
         updateAmplitudes(topObj);
-        updateLegend(topObj);
-        console.log(field + ": " + amplitudes);
+        updateLegend(topObj, field);
+        console.log('topObj:' + JSON.stringify(topObj));
     }
 
-    function updateLegend(topObj) {
-
+    function updateLegend(topObj, field) {
+        legendKeys = [];
+        for (var k in topObj) {
+            legendKeys.push(cleanFieldName(k));
+        }
+        plotLegends();
+        plotTitle(cleanFieldName(field));
     }
 
     function updateAmplitudes(topObj) {
@@ -90,7 +94,7 @@
     function get_top_n_amplitudes(topObj) {
         var topN = [];
         for (var k in topObj) {
-            var amp = (max_amplitude - max_amplitude * topObj[k]) * 1.5;
+            var amp = (max_amplitude - max_amplitude * topObj[k]) * 1.25;
             topN.push(amp);
         }
         return topN;
@@ -110,6 +114,80 @@
             return obj;
         }, {});
         return topObj;
+    }
+
+    function plotNote() {
+        var note = "Note: Highly correlated features would be closer to the circumference of the circle.";
+        // Note of the figure
+        svg.selectAll(".svgNote").remove();
+        svg.append("text")
+            .attr("x", 200)
+            .attr("y", 600)
+            .attr("class", "svgNote")
+            .style("font-size", "10px")
+            .style("font-family", "verdana")
+            .style("font-style", "italic")
+            .style("fill", "red")
+            .attr("alignment-baseline", "middle")
+            .text(note);
+    }
+
+    function plotTitle(field) {
+        // Title of the figure
+        svg.selectAll(".svgTitle").remove();
+        svg.append("text")
+            .attr("x", width / 4 - field.length)
+            .attr("y", 30)
+            .attr("class", "svgTitle")
+            .style("font-size", "20px")
+            .style("font-family", "verdana")
+            // .style("font-weight", "bold")
+            .style("font-style", "italic")
+            .attr("alignment-baseline", "middle")
+            .text("Features highly correlated with " + field);
+    }
+
+    function plotLegends() {
+        svg.selectAll(".legendDots").remove();
+        svg.selectAll(".legendDots")
+            .data(legendKeys)
+            .enter()
+            .append("circle")
+            .attr("class", "legendDots")
+            .attr("cx", 10)
+            .attr("cy", function (d, i) {
+                return 530 + i * 25
+            }) // 520 is where the first dot appears. 25 is the distance between dots
+            .attr("r", 7)
+            .style("fill", function (d, i) {
+                return colors[i];
+            });
+
+        svg.selectAll(".legendLabels").remove();
+        svg.selectAll(".legendLabels")
+            .data(legendKeys)
+            .enter()
+            .append("text")
+            .attr("class", "legendLabels")
+            .attr("x", 30)
+            .attr("y", function (d, i) {
+                return 530 + i * 25
+            }) // 520 is where the first dot appears. 25 is the distance between dots
+            // .style("fill", function (d, i) {
+            //     return colors[i];
+            // })
+            .style("font-size", "15px")
+            .style("font-family", "verdana")
+            .style("font-weight", function (d, i) {
+                if (i === 0) {
+                    return "bold";
+                }
+            })
+            .text(function (d) {
+                return d
+            })
+            .attr("text-anchor", "left")
+            .style("alignment-baseline", "middle");
     }
 
     // figure constants
@@ -154,6 +232,8 @@
                     return radius + amplitudes[i] * c * p;
                 });
         });
+
+    plotNote();
 
     d3.timer(function () {
         path.attr("d", function (d) {
