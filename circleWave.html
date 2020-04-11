@@ -1,0 +1,163 @@
+<!--<base href=https://cdn.rawgit.com/mbostock/2d466ec3417722e3568cd83fc35338e3/raw/ target="_blank">-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+<select id="player_fields" onclick="populatePlayerFields()" onchange="updateDrawing(value)">
+    <option selected>-- Player Field --</option>
+</select>
+<div id="vis">
+    <svg width="640" height="640"></svg>
+</div>
+<!--<div class=“container”></div>-->
+<!--<button onclick="initDataMap();draw();">Draw</button>-->
+<!--<canvas id="container" width="640" height="960"></canvas>-->
+</html>
+<script>
+
+    $(document).ready(function () {
+        // initDataMap();
+        populatePlayerFields();
+    });
+
+    var dataMap = new Map();
+
+    // This function is asynchronous
+    function initDataMap() {
+        if (dataMap.size === 0) {
+            d3.csv("resources/of_corr.csv", function (data) {
+                console.log(data);
+                data.forEach((d, i) => {
+                    for (var k in d) {
+                        var v = d[k];
+                        if (v === "1.0") {
+                            dataMap[k] = d;
+                        }
+                    }
+                });
+            });
+            console.log(dataMap);
+            console.log("Data map initialised");
+        }
+        // return dataMap
+    }
+
+    function populatePlayerFields() {
+        initDataMap();
+        var sel = document.getElementById("player_fields");
+        if(sel.children.length == 1) {
+            console.log("Populating fields");
+            for (var k in dataMap) {
+                // console.log(k);
+                var cleanOpt = cleanFieldName(k);
+                var opt = document.createElement("option");
+                opt.value = k;
+                opt.text = cleanOpt;
+                sel.add(opt);
+            }
+        }
+    }
+
+    function cleanFieldName(fieldName) {
+        var newFieldArr = [];
+        var x = fieldName.split("_");
+        for (var i = 0; i < x.length; i++) {
+            var str = x[i];
+            var newF = str.charAt(0).toUpperCase() + str.slice(1);
+            newFieldArr.push(newF)
+        }
+        var newField = newFieldArr.join(" ");
+        return newField;
+    }
+
+    function updateDrawing(field) {
+        var topObj = get_top_n_values(dataMap, field, 5);
+        updateAmplitudes(topObj);
+        updateLegend(topObj);
+        console.log(field + ": " + amplitudes);
+    }
+
+    function updateLegend(topObj) {
+
+    }
+
+    function updateAmplitudes(topObj) {
+        amplitudes = get_top_n_amplitudes(topObj);
+    }
+
+    function get_top_n_amplitudes(topObj) {
+        var topN = [];
+        for (var k in topObj) {
+            var amp = (max_amplitude - max_amplitude * topObj[k]) * 1.5;
+            topN.push(amp);
+        }
+        return topN;
+    }
+
+    function get_top_n_values(dataMap, field, n) {
+        var data = dataMap[field];
+        var props = Object.keys(data).map(function (key) {
+            return {key: key, value: this[key]};
+        }, data);
+        props.sort(function (p1, p2) {
+            return p2.value - p1.value;
+        });
+
+        var topObj = props.slice(0, n).reduce(function (obj, prop) {
+            obj[prop.key] = prop.value;
+            return obj;
+        }, {});
+        return topObj;
+    }
+
+    // figure constants
+    const lineWidth = 8;
+    const colors = ["violet", "magenta", "yellow", "pink", "cyan"];
+    const shift = 2 * Math.PI / colors.length;
+    // var shift = 2 * Math.PI / 1;
+    const speed = 1 / 2500;
+    const frequency = 8;
+    const max_amplitude = 64;
+    const n = 360;
+    var amplitudes = [32, 32, 32, 32, 32]; // default amplitudes
+
+    var svg = d3.select("svg"),
+        width = +svg.attr("width"),
+        height = +svg.attr("height"),
+        angles = d3.range(0, 2 * Math.PI, Math.PI / n),
+        radius = Math.min(width, height) / 2 - max_amplitude * 2;
+
+    var path = svg.append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+        .attr("fill", "none")
+        .attr("stroke-width", lineWidth)
+        .attr("stroke-linejoin", "round")
+        .selectAll("path")
+        .data(colors)
+        .enter().append("path")
+        .attr("stroke", function (d) {
+            return d;
+        })
+        .style("mix-blend-mode", "darken")
+        .datum(function (d, i) {
+            return d3.radialLine()
+                .curve(d3.curveLinearClosed)
+                .angle(function (a) {
+                    return a;
+                })
+                .radius(function (a) {
+                    const t = d3.now() * speed;
+                    const c = Math.cos(a * frequency - i * shift + t);
+                    const p = Math.pow((1 + Math.cos(a - t)) / 2, 3);
+                    return radius + amplitudes[i] * c * p;
+                });
+        });
+
+    d3.timer(function () {
+        path.attr("d", function (d) {
+            return d(angles);
+        });
+    });
+</script>
