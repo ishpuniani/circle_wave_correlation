@@ -1,17 +1,41 @@
 <!--<base href=https://cdn.rawgit.com/mbostock/2d466ec3417722e3568cd83fc35338e3/raw/ target="_blank">-->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:max-width="http://www.w3.org/1999/xhtml">
 <head>
     <title>Circle Wave Correlation</title>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
-<div id="vis">
-    <svg width="640" height="640"></svg>
+<div id="headings">
+    <!--    <h1 style='font-family: "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif'>Circle Wave Correlation Visualization</h1>-->
+    <h1 style='font-family: "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif'>
+        Correlation between various player attributes in FIFA 20
+    </h1>
+    <h3 id="plotTitle"
+        style='color: slategrey; font-family:"Helvetica Neue", Helvetica, Arial, Geneva, sans-serif'></h3>
 </div>
-<select id="player_fields" onclick="populatePlayerFields()" onchange="updateDrawing(value)">
-    <option selected>-- Player Field --</option>
-</select>
+<div>
+    <label style='color: lightslategrey; font-family:"Helvetica Neue", Helvetica, Arial, Geneva, sans-serif'>Select
+        Target
+        Attribute: </label>
+    <select id="player_fields" onclick="populatePlayerFields()" onchange="updateDrawing(value)">
+        <option selected>-- Player Field --</option>
+    </select>
+</div>
+<div id="vis" style="text-align: left">
+    <svg width="960" height="640"></svg>
+</div>
+<div id="visDesc" style="max-width: 800px">
+    <p align="justify" style='color: cadetblue; font-family:"Helvetica Neue", Helvetica, Arial, Geneva, sans-serif'>
+        A wave in the circle represents a field being correlated to the target field.
+        Each circle wave is a cosine signal revolving around a pivot. Each cosine signal has an amplitude inversely
+        proportional to its correlation to the target field. This implies, for an attribute that is highly correlated,
+        the amplitude of the wave will be low. Highly correlated fields will be closer to the circumference of the
+        circle.
+        Different colors in the visualization represent different attributes which are being correlated with the target
+        attribute.
+    </p>
+</div>
 </html>
 <script>
 
@@ -26,7 +50,7 @@
     // This function is asynchronous
     function initDataMap() {
         if (dataMap.size === 0) {
-            d3.csv("resources/of_corr.csv", function (data) {
+            d3.csv("resources/outfield_corr.csv", function (data) {
                 console.log(data);
                 data.forEach((d, i) => {
                     for (var k in d) {
@@ -81,10 +105,14 @@
     function updateLegend(topObj, field) {
         legendKeys = [];
         for (var k in topObj) {
-            legendKeys.push(cleanFieldName(k));
+            var legend = cleanFieldName(k) + " : " + parseFloat(topObj[k]).toFixed(3);
+            legendKeys.push(legend);
         }
         plotLegends();
-        plotTitle(cleanFieldName(field));
+        // plotTitle(cleanFieldName(field));
+        //updating the title
+        var titleStr = "Features highly correlated with the attribute, \"" + field + "\"";
+        document.getElementById('plotTitle').innerText = titleStr;
     }
 
     function updateAmplitudes(topObj) {
@@ -154,10 +182,10 @@
             .enter()
             .append("circle")
             .attr("class", "legendDots")
-            .attr("cx", 10)
+            .attr("cx", 520)
             .attr("cy", function (d, i) {
-                return 530 + i * 25
-            }) // 520 is where the first dot appears. 25 is the distance between dots
+                return 460 + i * 25
+            }) // 460 is where the first dot appears. 25 is the distance between dots
             .attr("r", 7)
             .style("fill", function (d, i) {
                 return colors[i];
@@ -169,15 +197,15 @@
             .enter()
             .append("text")
             .attr("class", "legendLabels")
-            .attr("x", 30)
+            .attr("x", 540)
             .attr("y", function (d, i) {
-                return 530 + i * 25
-            }) // 520 is where the first dot appears. 25 is the distance between dots
+                return 460 + i * 25
+            }) // 460 is where the first dot appears. 25 is the distance between dots
             // .style("fill", function (d, i) {
             //     return colors[i];
             // })
             .style("font-size", "15px")
-            .style("font-family", "verdana")
+            .style("font-family", "helvetica")
             .style("font-weight", function (d, i) {
                 if (i === 0) {
                     return "bold";
@@ -208,7 +236,9 @@
         radius = Math.min(width, height) / 2 - max_amplitude * 2;
 
     var path = svg.append("g")
-        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+    // .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+    // .attr("transform", "translate(" + ((width - max_amplitude)/ 2) + "," + ((height - max_amplitude)/ 2) + ")")
+        .attr("transform", "translate(280,280)")
         .attr("fill", "none")
         .attr("stroke-width", lineWidth)
         .attr("stroke-linejoin", "round")
@@ -233,7 +263,7 @@
                 });
         });
 
-    plotNote();
+    // plotNote();
 
     d3.timer(function () {
         path.attr("d", function (d) {
