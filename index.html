@@ -11,16 +11,16 @@
     <h1 style='font-family: "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif'>
         Correlation between various player attributes in FIFA 20
     </h1>
-    <h3 id="plotTitle"
-        style='color: slategrey; font-family:"Helvetica Neue", Helvetica, Arial, Geneva, sans-serif'></h3>
 </div>
 <div>
     <label style='color: lightslategrey; font-family:"Helvetica Neue", Helvetica, Arial, Geneva, sans-serif'>Select
         Target
-        Attribute: </label>
+        Attribute : </label>
     <select id="player_fields" onclick="populatePlayerFields()" onchange="updateDrawing(value)">
         <option selected>-- Player Field --</option>
     </select>
+    <h3 id="plotTitle"
+        style='color: slategrey; font-family:"Helvetica Neue", Helvetica, Arial, Geneva, sans-serif'></h3>
 </div>
 <div id="vis" style="text-align: left">
     <svg width="960" height="640"></svg>
@@ -111,7 +111,7 @@
         plotLegends();
         // plotTitle(cleanFieldName(field));
         //updating the title
-        var titleStr = "Features highly correlated with the attribute, \"" + field + "\"";
+        var titleStr = "Features highly correlated with the attribute, \"" + cleanFieldName(field) + "\" :";
         document.getElementById('plotTitle').innerText = titleStr;
     }
 
