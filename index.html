@@ -16,39 +16,41 @@
     <label style='color: lightslategrey; font-family:"Helvetica Neue", Helvetica, Arial, Geneva, sans-serif'>Select
         Target
         Attribute : </label>
-<!--    <select id="player_fields" onclick="populatePlayerFields()" onchange="updateDrawing(value)">-->
-    <select id="player_fields" onchange="updateDrawing(value)">
-        <option selected="">-- Player Field --</option>
-        <option value="age">Age</option>
-        <option value="height_cm">Height Cm</option>
-        <option value="weight_kg">Weight Kg</option>
-        <option value="nationality">Nationality</option>
-        <option value="club">Club</option>
-        <option value="overall">Overall</option>
-        <option value="potential">Potential</option>
-        <option value="value_eur">Value Eur</option>
-        <option value="wage_eur">Wage Eur</option>
-        <option value="player_positions">Player Positions</option>
-        <option value="international_reputation">International Reputation</option>
-        <option value="weak_foot">Weak Foot</option>
-        <option value="skill_moves">Skill Moves</option>
-        <option value="release_clause_eur">Release Clause Eur</option>
-        <option value="team_jersey_number">Team Jersey Number</option>
-        <option value="contract_valid_until">Contract Valid Until</option>
-        <option value="pace">Pace</option>
-        <option value="shooting">Shooting</option>
-        <option value="passing">Passing</option>
-        <option value="dribbling">Dribbling</option>
-        <option value="defending">Defending</option>
-        <option value="physicality">Physicality</option>
-        <option value="att_work_rate">Att Work Rate</option>
-        <option value="def_work_rate">Def Work Rate</option>
-        <option value="growth">Growth</option>
-        <option value="preferred_foot_Left">Preferred Foot Left</option>
-        <option value="preferred_foot_Right">Preferred Foot Right</option>
+    <select id="player_fields" onclick="populatePlayerFields()" onchange="updateDrawing(value)">
+        <option selected="">&#45;&#45; Player Field &#45;&#45;</option>
     </select>
-    <h3 id="plotTitle"
-        style='color: slategrey; font-family:"Helvetica Neue", Helvetica, Arial, Geneva, sans-serif'></h3>
+        <!--<select id="player_fields" onchange="updateDrawing(value)">
+            <option selected="">&#45;&#45; Player Field &#45;&#45;</option>
+            <option value="age">Age</option>
+            <option value="height_cm">Height Cm</option>
+            <option value="weight_kg">Weight Kg</option>
+            <option value="nationality">Nationality</option>
+            <option value="club">Club</option>
+            <option value="overall">Overall</option>
+            <option value="potential">Potential</option>
+            <option value="value_eur">Value Eur</option>
+            <option value="wage_eur">Wage Eur</option>
+            <option value="player_positions">Player Positions</option>
+            <option value="international_reputation">International Reputation</option>
+            <option value="weak_foot">Weak Foot</option>
+            <option value="skill_moves">Skill Moves</option>
+            <option value="release_clause_eur">Release Clause Eur</option>
+            <option value="team_jersey_number">Team Jersey Number</option>
+            <option value="contract_valid_until">Contract Valid Until</option>
+            <option value="pace">Pace</option>
+            <option value="shooting">Shooting</option>
+            <option value="passing">Passing</option>
+            <option value="dribbling">Dribbling</option>
+            <option value="defending">Defending</option>
+            <option value="physicality">Physicality</option>
+            <option value="att_work_rate">Att Work Rate</option>
+            <option value="def_work_rate">Def Work Rate</option>
+            <option value="growth">Growth</option>
+            <option value="preferred_foot_Left">Preferred Foot Left</option>
+            <option value="preferred_foot_Right">Preferred Foot Right</option>
+        </select>-->
+        <h3 id="plotTitle"
+            style='color: slategrey; font-family:"Helvetica Neue", Helvetica, Arial, Geneva, sans-serif'></h3>
 </div>
 <div id="vis" style="text-align: left">
     <svg width="960" height="640"></svg>
@@ -79,7 +81,7 @@
     // This function is asynchronous
     function initDataMap() {
         if (dataMap.size === 0) {
-            d3.csv("resources/outfield_corr.csv", function (data) {
+            d3.csv("resources/bh_corr.csv", function (data) {
                 console.log(data);
                 data.forEach((d, i) => {
                     for (var k in d) {
